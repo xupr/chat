@@ -1,0 +1,14 @@
+{
+  "main": "index.html",
+  "name": "chat-client",
+  "window": {
+    "toolbar": false
+  },
+  "dependencies": {
+    "socket.io": "*",
+    "socket.io-client": "~1.3.4",
+    "bluebird": "~2.9.12",
+    "mongoose": "~3.8.23"
+  },
+  "single-instance": false
+}

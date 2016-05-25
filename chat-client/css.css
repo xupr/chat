@@ -1,0 +1,214 @@
+/*determine how to place the element*/
+body{
+	margin: 0;
+}
+
+.win{
+	padding-top: 20px;
+	position: absolute;
+	top:0;
+	left:0;
+	width: 100%;
+	height: 100%;
+	background-color: white;
+	z-index: 0;
+}
+
+.form-group{
+	width: 80%;
+	margin-left: 10%;
+}
+
+.lists{
+	height: inherit;
+}
+
+#lists{
+	position: absolute;
+	height: calc(100% - 40px);
+	right: 10px;
+	top: 15px;
+	width: 40%;
+}
+
+#rooms{
+	position: absolute;
+	height: calc(100% - 40px);
+	left: 10px;
+	top: 15px;
+	width: calc(60% - 40px);
+}
+
+.room, .PM{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.center{
+	text-align: center;
+	flex: 0 0 auto;
+}
+
+.chat{
+	font-family: 'Ubuntu Mono';
+	margin-left: 10px;
+	margin-right: 10px;
+	overflow-y: auto;
+	height: 100%;
+	flex: 1;
+}
+
+.chat-input{
+	margin-top: 10px;
+}
+
+.message-span{
+	word-wrap: break-word;
+	width: 100%;
+	white-space: pre-wrap;
+}
+
+.message-header{
+	float: left;
+}
+
+.message-text{
+	overflow: hidden;
+	display: list-item;
+}
+
+.message{
+	width: 100%;
+}
+
+.room-input{
+	margin-bottom: 10px;
+	flex: 0 0 auto;
+}
+
+.overflow-auto{
+	overflow-y: auto;
+	flex: 1 1 auto;
+	height: 100%;
+}
+
+.list-container{
+	position: relative;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+#listToggle{
+	width: 100%;
+	position: absolute;
+	bottom: 0;
+}
+
+#toggleRooms, #toggleUsers{
+	width: 50%;
+}
+
+#usersList, #roomsList{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
+
+.list{
+	display: flex;
+	flex-direction: column;
+}
+
+.add-to-group{
+	top: -1px;
+	padding-left: 15px;
+	margin-top: auto;
+	margin-bottom: auto;
+	align-self: stretch;
+	display: none;
+}
+
+.seperator{
+	align-self: stretch;
+	border-left: 1px solid #ccc;
+	margin-left: 10px;
+	display: none;
+}
+
+.list-text{
+	flex: 1;
+	word-wrap: break-word;
+}
+
+.list-item-flex{
+	display: flex;
+	align-items: center;
+	align-content: center;
+}
+
+.addUserButton{
+	position: absolute;
+	right: 0;
+	width: 45px;
+	height: 100%;
+	top: 0;
+	display: none;
+	z-index: 10;
+}
+
+.user{
+	direction: rtl;
+}
+
+.message-header-user{
+	float: right;
+}
+
+a.list-group-item{
+	z-index: 1;
+}
+
+.glyphicon-spin {
+	-webkit-animation: spin .7s infinite linear;
+}
+
+@-webkit-keyframes spin {
+	from { -webkit-transform: rotate(0deg);}
+	to { -webkit-transform: rotate(360deg);}
+}
+
+.glyphicon-large{
+	font-size: 4em;
+	margin: auto;
+}
+
+.glyphicon-larger{
+	font-size: 10em;
+	display:table-cell;
+	vertical-align:middle;
+}
+
+#usersInRoom .glyphicon-plus:before {
+	content:  "\2212";
+}
+
+#loadingWindow{
+	display: table;
+	text-align: center;
+	overflow: hidden;
+}
+
+#chatWindow{
+	display: flex;
+	flex-direction: column;
+}
+
+#chatContainer{
+	width: 100%;
+	position: relative;
+	flex: 1 0 auto;
+}

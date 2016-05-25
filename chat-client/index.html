@@ -1,0 +1,284 @@
+<!--determine the hierarchy of the layout-->
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Chat Client</title>
+		<link rel="stylesheet" type="text/css" href="https://bootswatch.com/lumen/bootstrap.min.css">
+		<link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" type="text/css" href="css.css">
+	</head>
+	<body>
+		<div id="registerWindow" class="win">
+			<div class="form-group">
+				<label>Username:</label>
+				<input id="registerUsername" class="form-control" placeholder="Enter username"/>
+			</div>
+			
+			<div class="form-group">
+				<label>Password:</label>
+				<input id="registerPassword" type="password" class="form-control" placeholder="Enter password"/>
+			</div>
+
+			<div class="form-group">
+				<button id="register" class="btn btn-primary">register</button>
+				<button class="switchLocation btn btn-default" data-location="#loginWindow">go to login</button>
+			</div>
+		</div>
+
+		<div id="chatWindow" class="win">
+			<h3 class="center">hello</h3>
+			<div id="chatContainer">
+				<div id="lists">
+					<div class="well lists">
+						<div class="list-container">
+							<div  id="roomsList" class="list">
+								<h4 class="center">Rooms</h4>
+								<div class="input-group room-input">
+									<input id="roomName" type="text" class="form-control text" placeholder="Create room">
+									<span class="input-group-btn">
+										<button id="createRoom" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></button>
+									</span>
+								</div>
+								<input id="roomSearch" type="text" class="form-control text" placeholder="Filter rooms">
+								<div class="list-group overflow-auto">
+									<a class="list-group-item active list-item-flex" href="#" data-roomid="general"data-roomname="general" data-admin="false">
+										<span class="list-text">general</span>
+										<span class="badge">0</span>
+									</a>
+								</div>
+							</div>
+							<div id="usersList" class="list">
+								<h4 class="center">Users</h4>
+								<input id="userSearch" type="text" class="form-control text" placeholder="Filter users">
+								<div class="list-group overflow-auto" id="usersNotInRoom"></div>
+								<h4 class="center">Users In Room</h4>
+								<div class="list-group overflow-auto" id="usersInRoom"></div>
+							</div>
+						</div>
+					</div>
+					<div id="listToggle" class="btn-group" role="group">
+						<button id="toggleRooms" type="button" class="btn btn-primary">Rooms</button>
+						<button id="toggleUsers" type="button" class="btn btn-default">Users</button>
+					</div>
+				</div>
+				<div id="rooms">
+					<div id="general" class="room">
+						<h3 class="center">Room - general</h3>
+						<span class="glyphicon glyphicon-repeat glyphicon-spin glyphicon-large"></span>
+						<div class="chat" style="display: none"></div>
+						<div class="input-group chat-input">
+							<textarea type="text" class="form-control text custom-control" placeholder="Enter message" style="resize:none"></textarea>
+							<span class="input-group-btn btn btn-default send input-group-addon" data-roomid="general">send</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="loginWindow" class="win">
+			<div class="form-group">
+				<label>Username:</label>
+				<input id="loginUsername" class="form-control" placeholder="Enter username"/>
+			</div>
+
+			<div class="form-group">
+				<label>Password:</label>
+				<input id="loginPassword" type="password" class="form-control" placeholder="Enter password"/>
+			</div>
+
+			<div class="form-group">
+				<button id="login" class="btn btn-primary">login</button>
+				<button class="switchLocation btn btn-default" data-location="#registerWindow">not registered?</button>
+			</div>
+		</div>
+		
+		<div id="loadingWindow" class="win">
+			<span class="glyphicon glyphicon-repeat glyphicon-spin glyphicon-larger"></span>
+		</div>
+
+		<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+		<script type="text/javascript" src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tinysort/2.1.1/tinysort.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/buzz/1.1.9/buzz.min.js"></script>
+		<script type="text/javascript" src="userEvents.js"></script>
+		<script type="text/javascript" src="messageEvents.js"></script>
+		<script type="text/javascript" src="roomEvents.js"></script>
+		<script type="text/javascript" src="pmEvents.js"></script>
+		<script>
+			'use strict';
+			function putOnTop(element){
+				var max = 0;
+				$('.win').each(function(){
+					max = Math.max(max, $(this).css('z-index'));
+				});
+				$(element).css('z-index', max+1);
+			}
+
+			function slide(id, type, admin){
+				if(slideable){
+					slideable = false;
+					admin = admin || false;
+					if(type === 'room'){
+						var prefix = '#';
+						var suffix = 'roomid';
+					}else{
+						var prefix = '#to-';
+						var suffix = 'username';
+					}
+					var $oldRoom = $('.list-group-item.active');
+					var $newRoom = $('.list-group-item[data-'+suffix+'='+id+']');
+					var oldGramp = $oldRoom.parent().parent().attr('id');
+					var newGramp = $newRoom.parent().parent().attr('id');
+					var dir1, dir2;
+					if(oldGramp === 'usersList' && newGramp === 'roomsList'){
+						dir1 = 'left';
+						dir2 = 'right';
+					}
+					else if(oldGramp === 'roomsList' && newGramp === 'usersList'){
+						dir1 = 'right';
+						dir2 = 'left';
+					}
+					else if($('.list-group-item').index($oldRoom) > $('.list-group-item').index($newRoom)){
+						dir1 = 'up';
+						dir2 = 'down';
+					}
+					else {
+						dir1 = 'down';
+						dir2 = 'up';
+					}
+
+					$(prefix+$newRoom.data(suffix)).slideUp(0);
+
+					$oldRoom.removeClass('active');
+					if(currentRoom.type === 'PM') 
+						$oldRoom = $('#to-'+currentRoom.room);
+					else
+						$oldRoom = $('#'+currentRoom.room);
+					$newRoom.addClass('active');
+					if($newRoom.children('.badge').html() != 0){
+						$newRoom.children('.badge').html(0);
+						$newRoom.removeClass('notify');
+						socket.emit('seenMessages', $newRoom.data(suffix));
+					}
+					$oldRoom.hide('slide', {direction: dir2}, 200);
+
+					$(prefix+$newRoom.data(suffix)).show('slide', {direction: dir1}, 200, function(){
+						$(prefix+$newRoom.data(suffix)+' .chat').scrollTop($(prefix+$newRoom.data(suffix)+' .chat')[0].scrollHeight);
+						slideable = true;
+						currentRoom = {room: $newRoom.data(suffix), type:type};
+						if(type === 'room'){
+							if(admin){
+								$newRoom.data('admin', 'true');
+								$('.seperator').show();
+								$('.add-to-group').show();
+								$('.addUserButton').show();
+							}else{
+								$newRoom.data('admin', 'false');
+								$('.seperator').hide();
+								$('.add-to-group').hide();
+								$('.addUserButton').hide();
+							}
+							$('#usersInRoom a').each(function(){
+								$(this).appendTo($('#usersNotInRoom'));
+							});
+							var users = $newRoom.data('users');
+							if(users){
+								var $list = $('#usersInRoom');
+								for (var i = users.length - 1; i >= 0; i--) {
+									$('.list-group-item[data-username='+users[i]+']').appendTo($list);
+								};
+							}
+							sortUsers();
+						}
+
+						if(slideQueue.length != 0){
+							var props = slideQueue.splice(0, 1)[0];
+							slide(props.id, props.type, props.admin);
+						}
+					});
+				}else
+					slideQueue.push({id: id, type: type, admin: admin});
+			}
+
+			var slideable, slideQueue, currentRoom, loggable;
+
+			$('#usersList').hide(0);
+			var io = require('socket.io-client'),
+			mongoose = require('mongoose');
+
+			mongoose.connect('mongodb://client:client@ds031627.mongolab.com:31627/servers');
+			var socket;
+
+			var Server = mongoose.model('Server', { connection: String, users: Number });
+
+			function createClient(){
+				Server.findOne().sort('users').exec(function(err, server){
+					if(err) console.log(err);
+					else if(server) {
+						putOnTop('#loginWindow');
+						socket = io(server.connection);
+						slideable = true;
+						loggable = true;
+						slideQueue = [];
+						currentRoom = {room:'general', type:'room'};
+						bindUserEvents(socket);
+						bindMessageEvents(socket);
+						bindRoomEvents(socket);
+						bindPmEvents(socket);
+
+						socket.on('disconnect', function(){
+							if(socket.username) $('#logged').html('server down please relog');
+							createClient();
+						});
+
+						$('.switchLocation').click(function(){
+							putOnTop($(this).data('location'));
+						});
+
+						$('#register').click(function(){
+							socket.emit('register', {username: $('#registerUsername').val(), password: $('#registerPassword').val()});
+						});
+
+						$('#login').click(function(){
+							if(loggable){
+								socket.emit('login', {username: $('#loginUsername').val(), password: $('#loginPassword').val()});
+								loggable = false;
+							}
+						});
+
+						socket.on('logged', function(data){
+							loggable = true;
+							if(data.status == 'success') {
+								socket.username = data.username;
+								$('#logged').html('hello '+data.username);
+								$('#chatWindow>h3').html('Hello ' + data.username);
+								putOnTop('#chatWindow');
+							}
+						});
+
+						$('#toggleUsers').click(function(){
+							$(this).removeClass('btn-default');
+							$(this).addClass('btn-primary');
+							$('#toggleRooms').removeClass('btn-primary');
+							$('#toggleRooms').addClass('btn-default');
+							$('#roomsList').hide('slide', {direction: 'left'}, 200);
+							$('#usersList').show('slide', {direction: 'right'}, 200);
+						});
+
+						$('#toggleRooms').click(function(){
+							$(this).removeClass('btn-default');
+							$(this).addClass('btn-primary');
+							$('#toggleUsers').removeClass('btn-primary');
+							$('#toggleUsers').addClass('btn-default');
+							$('#roomsList').show('slide', {direction: 'left'}, 200);
+							$('#usersList').hide('slide', {direction: 'right'}, 200);
+						});
+					}else $('body').html('no available servers');
+				});
+			}
+
+			createClient();
+		</script>
+	</body>
+</html>
